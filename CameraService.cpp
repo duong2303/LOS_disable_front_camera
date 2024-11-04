@@ -288,6 +288,9 @@ status_t CameraService::enumerateProviders() {
 
 
     for (auto& cameraId : deviceIds) {
+        if (cameraId == "1") {
+            continue;
+         }
         if (getCameraState(cameraId) == nullptr) {
             onDeviceStatusChanged(cameraId, CameraDeviceStatus::PRESENT);
         }
@@ -2212,6 +2215,11 @@ Status CameraService::connect(
     std::string unresolvedCameraId = cameraIdIntToStr(api1CameraId);
     std::string cameraIdStr = resolveCameraId(unresolvedCameraId,
             CameraThreadState::getCallingUid());
+
+    if (cameraIdStr == "1") {
+        return Status::fromExceptionCode(Status::EX_ILLEGAL_ARGUMENT,
+                                         "Front camera access is disabled");
+    }
     sp<Client> client = nullptr;
     ret = connectHelper<ICameraClient,Client>(cameraClient, cameraIdStr, api1CameraId,
             clientPackageName, /*systemNativeClient*/ false, {}, clientUid, clientPid, API_1,
